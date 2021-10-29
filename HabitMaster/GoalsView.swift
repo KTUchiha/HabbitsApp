@@ -11,9 +11,11 @@ struct GoalsView: View {
     @State private var goal: String = ""
     @State private var why: String = ""
     @State private var days: String = ""
+    @State private var trigger: String = ""
     @State private var isEditing1 = false
     @State private var isEditing2 = false
     @State private var isEditing3 = false
+    @State private var isEditing4 = false
     
     
     var body: some View {
@@ -67,8 +69,18 @@ struct GoalsView: View {
                 
             }
             Spacer()
+            Text("My Trigger is...")
+            HStack{
+                Spacer()
+                TextField(
+                    "What already existing habit will you link this to?",
+                    text: $trigger
+                )
+                
+                    
+            }
             Spacer()
-            Spacer()
+            
             
             
         
