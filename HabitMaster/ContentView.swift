@@ -6,6 +6,25 @@
 //
 
 import SwiftUI
+
+struct CheckView: View  {
+    @State var isChecked:Bool = false
+    var title:String
+    @State var isGray:Bool = true
+    func toggle(){isChecked = !isChecked}
+    var body: some View {
+        Button(action: toggle){
+            HStack{
+                Image(systemName: isChecked ? "checkmark.square": "square").saturation(isGray ? 0.0 : 1.0)
+                Text(title)
+            }
+
+        }
+
+     }
+
+}
+
 struct ContentView: View {
     struct Goal: Identifiable {
         let name: String
@@ -40,7 +59,18 @@ struct ContentView: View {
                 .padding()
             Spacer()
             List(goals) {
-                Text($0.name)
+                
+               // HStack{
+                    Text($0.name)
+                HStack{
+                    CheckView(isChecked: true,title: "")
+                    CheckView(isChecked: true,title: "")
+                    CheckView(isChecked: true,title: "")
+                    CheckView(isChecked: true,title: "")
+                    CheckView(isChecked: true,title: "")
+                    CheckView(isChecked: true, title: "Today",  isGray: false)
+                }
+                //    }
             }
             
             NavigationView{
@@ -73,7 +103,12 @@ struct ContentView: View {
     
     struct ContentView_Previews: PreviewProvider {
         static var previews: some View {
-            ContentView()
+            Group {
+                ContentView()
+                ContentView()
+                ContentView()
+                ContentView()
+            }
         }
     }
 }
