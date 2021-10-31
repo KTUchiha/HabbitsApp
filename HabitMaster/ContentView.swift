@@ -20,7 +20,7 @@ struct CheckboxStyle: ToggleStyle {
             Image(systemName: configuration.isOn ? "checkmark.circle.fill" : "circle")
                 .resizable()
                 .frame(width: 24, height: 24)
-                .foregroundColor(configuration.isOn ? .green : .gray)
+                .foregroundColor(configuration.isOn ? .green : .red)
                 .font(.system(size: 20, weight: .bold, design: .default))
                 .onTapGesture {
                     configuration.isOn.toggle()
@@ -70,7 +70,7 @@ struct ContentView: View {
         Goal(name: "Excercise Daily", why:"Get fit"),
         Goal(name: "Drink Water 4 times",why:"Stop Headaches"),
         Goal(name: "Sleep by 9:30PM",why:"Prevent fatigue the next day"),
-        Goal(name: "Wake up at 5:00AM",why:"concentrate"),
+      //  Goal(name: "Wake up at 5:00AM",why:"concentrate"),
         Goal(name: "Practice Piano", why:"get better at piano")
        
     ]
@@ -95,7 +95,7 @@ struct ContentView: View {
                // HStack{
                     Text($0.name)
                 HStack{
-                    CheckView(isChecked: true,title: "")
+                  //  CheckView(isChecked: true,title: "")
                     CheckView(isChecked: true,title: "")
                     CheckView(isChecked: true,title: "")
                     CheckView(isChecked: true,title: "")
@@ -103,32 +103,32 @@ struct ContentView: View {
                     CheckView(isChecked: true,title: "")
                     CheckView(isChecked: true, title: "Today",  isGray: false)
                 }
+                
                 //    }
             }
             
             NavigationView{
-                
                 NavigationLink(destination:  GoalsView()
                 ){
                     //Button(action:{
                     // }, label:{
                     HStack{
-                        Image(systemName: "plus")
-                        Text("Add Goals")
+                        Image(systemName: "plus").frame(height: 32.0)
+                        Text("Add Goals").frame( height: 32.0)
                             
                     }
                     
                     
                     //})
                     
-                }
+                }.frame( height: 32.0)
                 
                 
-            }
+            }.frame( height: 280)
+            
+
         }
     }
-    
-    
     
     
     
@@ -138,9 +138,9 @@ struct ContentView: View {
         static var previews: some View {
             Group {
                 ContentView()
-                ContentView()
-                ContentView()
-                ContentView()
+            //    ContentView()
+            //    ContentView()
+              //  ContentView()
             }
         }
     }
