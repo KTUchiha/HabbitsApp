@@ -7,19 +7,51 @@
 
 import SwiftUI
 
+struct CheckboxStyle: ToggleStyle {
+ 
+    func makeBody(configuration: Self.Configuration) -> some View {
+ 
+        return HStack {
+ 
+            configuration.label
+ 
+        //    Spacer()
+ 
+            Image(systemName: configuration.isOn ? "checkmark.circle.fill" : "circle")
+                .resizable()
+                .frame(width: 24, height: 24)
+                .foregroundColor(configuration.isOn ? .green : .gray)
+                .font(.system(size: 20, weight: .bold, design: .default))
+                .onTapGesture {
+                    configuration.isOn.toggle()
+                }
+        }
+ 
+    }
+}
+
+    
 struct CheckView: View  {
     @State var isChecked:Bool = false
     var title:String
     @State var isGray:Bool = true
+    
     func toggle(){isChecked = !isChecked}
+    
+    
     var body: some View {
-        Button(action: toggle){
-            HStack{
-                Image(systemName: isChecked ? "checkmark.circle": "circle").saturation(isGray ? 0.0 : 1.0)
-                Text(title)
-            }
-
-        }
+//        Button(action: toggle){
+//            HStack{
+//                Image(systemName: isChecked ? "checkmark.circle": "circle").saturation(isGray ? 0.0 : 1.0)
+//                Text(title)
+//            }
+//
+//        }
+        
+        Toggle(isOn: $isChecked, label: {
+           // Image(systemName: "heart")
+            Text(title)
+        }).toggleStyle(CheckboxStyle())
 
      }
 
@@ -64,10 +96,10 @@ struct ContentView: View {
                     Text($0.name)
                 HStack{
                     CheckView(isChecked: true,title: "")
-                    CheckView(isChecked: false,title: "")
                     CheckView(isChecked: true,title: "")
                     CheckView(isChecked: true,title: "")
-                    CheckView(isChecked: false,title: "")
+                    CheckView(isChecked: true,title: "")
+                    CheckView(isChecked: true,title: "")
                     CheckView(isChecked: true,title: "")
                     CheckView(isChecked: true, title: "Today",  isGray: false)
                 }
