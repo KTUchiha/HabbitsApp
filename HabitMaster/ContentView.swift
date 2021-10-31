@@ -70,7 +70,7 @@ struct ContentView: View {
         Goal(name: "Excercise Daily", why:"Get fit"),
         Goal(name: "Drink Water 4 times",why:"Stop Headaches"),
         Goal(name: "Sleep by 9:30PM",why:"Prevent fatigue the next day"),
-      //  Goal(name: "Wake up at 5:00AM",why:"concentrate"),
+        Goal(name: "Wake up at 5:00AM",why:"concentrate"),
         Goal(name: "Practice Piano", why:"get better at piano")
        
     ]
@@ -88,7 +88,7 @@ struct ContentView: View {
         
         VStack {
             Text(getDate())
-                .padding()
+                //.padding()
             Spacer()
             List(goals) {
                 
@@ -117,14 +117,12 @@ struct ContentView: View {
                         Text("Add Goals").frame( height: 32.0)
                             
                     }
-                    
-                    
                     //})
                     
                 }.frame( height: 32.0)
                 
                 
-            }.frame( height: 280)
+            }.frame( height: 222)
             
 
         }
