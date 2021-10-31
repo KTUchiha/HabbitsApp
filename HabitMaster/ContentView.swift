@@ -15,7 +15,7 @@ struct CheckView: View  {
     var body: some View {
         Button(action: toggle){
             HStack{
-                Image(systemName: isChecked ? "checkmark.square": "square").saturation(isGray ? 0.0 : 1.0)
+                Image(systemName: isChecked ? "checkmark.circle": "circle").saturation(isGray ? 0.0 : 1.0)
                 Text(title)
             }
 
@@ -64,9 +64,10 @@ struct ContentView: View {
                     Text($0.name)
                 HStack{
                     CheckView(isChecked: true,title: "")
+                    CheckView(isChecked: false,title: "")
                     CheckView(isChecked: true,title: "")
                     CheckView(isChecked: true,title: "")
-                    CheckView(isChecked: true,title: "")
+                    CheckView(isChecked: false,title: "")
                     CheckView(isChecked: true,title: "")
                     CheckView(isChecked: true, title: "Today",  isGray: false)
                 }
