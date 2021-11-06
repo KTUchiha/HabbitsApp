@@ -7,13 +7,13 @@
 
 import SwiftUI
 
-struct CheckboxStyle: ToggleStyle {
+struct CheckboxStyle: ToggleStyle { // this struct defines how the toggle should look like
  
-    func makeBody(configuration: Self.Configuration) -> some View {
+    func makeBody(configuration: Self.Configuration) -> some View { //making your own checkbox
  
         return HStack {
  
-            configuration.label
+            configuration.label //
  
         //    Spacer()
  
@@ -34,11 +34,9 @@ struct CheckboxStyle: ToggleStyle {
 struct CheckView: View  {
     @State var isChecked:Bool = false
     var title:String
-    @State var isGray:Bool = true
+ //   @State var isGray:Bool = true
     
-    func toggle(){isChecked = !isChecked}
-    
-    
+   // func toggle(){isChecked = !isChecked}
     var body: some View {
 //        Button(action: toggle){
 //            HStack{
@@ -101,7 +99,8 @@ struct ContentView: View {
                     CheckView(isChecked: true,title: "")
                     CheckView(isChecked: true,title: "")
                     CheckView(isChecked: true,title: "")
-                    CheckView(isChecked: true, title: "Today",  isGray: false)
+                    CheckView(isChecked: true, title: "Today")
+
                 }
                 
                 //    }
