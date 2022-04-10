@@ -15,6 +15,7 @@
 		0175EC70271D004D004A255F /* HabitMasterUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0175EC6F271D004D004A255F /* HabitMasterUITests.swift */; };
 		0175EC72271D004D004A255F /* HabitMasterUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0175EC71271D004D004A255F /* HabitMasterUITestsLaunchTests.swift */; };
 		0175EC7F271ED6E0004A255F /* GoalsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0175EC7E271ED6E0004A255F /* GoalsView.swift */; };
+		EB1D79BE2741AFA600F29EC0 /* Goal.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = EB1D79BC2741AFA600F29EC0 /* Goal.xcdatamodeld */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +47,7 @@
 		0175EC6F271D004D004A255F /* HabitMasterUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitMasterUITests.swift; sourceTree = "<group>"; };
 		0175EC71271D004D004A255F /* HabitMasterUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitMasterUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		0175EC7E271ED6E0004A255F /* GoalsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalsView.swift; sourceTree = "<group>"; };
+		EB1D79BD2741AFA600F29EC0 /* Goal.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Goal.xcdatamodel; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,6 +100,7 @@
 			children = (
 				0175EC54271D004B004A255F /* HabitMasterApp.swift */,
 				0175EC56271D004B004A255F /* ContentView.swift */,
+				EB1D79BC2741AFA600F29EC0 /* Goal.xcdatamodeld */,
 				0175EC7E271ED6E0004A255F /* GoalsView.swift */,
 				0175EC58271D004C004A255F /* Assets.xcassets */,
 				0175EC5A271D004C004A255F /* Preview Content */,
@@ -260,6 +263,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EB1D79BE2741AFA600F29EC0 /* Goal.xcdatamodeld in Sources */,
 				0175EC7F271ED6E0004A255F /* GoalsView.swift in Sources */,
 				0175EC57271D004B004A255F /* ContentView.swift in Sources */,
 				0175EC55271D004B004A255F /* HabitMasterApp.swift in Sources */,
@@ -611,6 +615,19 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		EB1D79BC2741AFA600F29EC0 /* Goal.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				EB1D79BD2741AFA600F29EC0 /* Goal.xcdatamodel */,
+			);
+			currentVersion = EB1D79BD2741AFA600F29EC0 /* Goal.xcdatamodel */;
+			path = Goal.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 0175EC49271D004B004A255F /* Project object */;
 }
