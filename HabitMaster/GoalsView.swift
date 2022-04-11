@@ -107,7 +107,7 @@ struct GoalsView: View {
                
                 startdate = cal.date(byAdding: .day, value: -3, to: Calendar.current.startOfDay(for: Date()))!
                 
-                let stopDate = cal.date(byAdding: .day, value: Int(days) ?? 30, to: startdate)!
+                let stopDate = cal.date(byAdding: .day, value: Int(days)! + 2 ?? 30, to: startdate)!
 
                 while startdate <= stopDate {
                     //mydates.append(from: startdate)

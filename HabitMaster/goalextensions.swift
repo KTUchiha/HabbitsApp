@@ -22,6 +22,6 @@ extension GoalModel {
     
     public var totalnow: String {
         let set = trackeddays as? Set<DaysModel> ?? []
-        return  "(" + String( set.filter{ $0.status && $0.dt! < Date() }.count  ) + " days Committed )"
+        return    String( set.filter{ $0.status && $0.dt! < Date() }.count  ) + " days Committed, " + String( set.filter{ $0.dt! > Calendar.current.startOfDay(for: Date()) }.count) + " to go."
     }
 }

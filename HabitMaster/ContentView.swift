@@ -148,10 +148,11 @@ struct ContentView: View {
                 ForEach(goals, id: \.self) { goal in
                     HStack(alignment:.firstTextBaseline){
                         Text(goal.name ??  "My Goal").font(.system(size: 20, weight: .heavy, design: .default))
-                        Text(" " + goal.totalnow )
+                        Text(" " + goal.totalnow ).font(.system(size: 12, weight: .light, design: .default))
                         Button(action: {
                             moc.delete(goal)
                             try?moc.save()
+                            dismiss()
                         }) {
                             Image(systemName: "trash")
                                 //.font(.largeTitle)
