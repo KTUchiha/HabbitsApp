@@ -9,11 +9,13 @@
 
 import SwiftUI
 
+@available(iOS 15.0, *)
 @main
 struct HabitMasterApp: App {
+    @StateObject private var dataController = DataController()
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView().environment(\.managedObjectContext, dataController.container.viewContext)
         }
     }
 }

@@ -7,8 +7,11 @@
 
 import SwiftUI
 
+@available(iOS 15.0, *)
 struct GoalsView: View {
-    @State private var goal: String = ""
+    @Environment(\.managedObjectContext) var moc
+    @Environment(\.dismiss) var dismiss
+    @State private var title: String = ""
     @State private var why: String = ""
     @State private var days: String = ""
     @State private var trigger: String = ""
@@ -36,7 +39,7 @@ struct GoalsView: View {
                     Text("My goal ")
                     TextField(
                            " Tell us what you want to achieve",
-                            text: $goal
+                            text: $title
                        ){ isEditing in
                            self.isEditing1 = isEditing
                    }.foregroundColor(isEditing1 ? .red : .blue)
@@ -61,15 +64,14 @@ struct GoalsView: View {
             HStack{
                 Spacer()
                 Text("I commit for")
+                
                 TextField(
-                       " How many days will you attempt this goal?",
+                       "Type a Number",
                         text: $days
                    ){ isEditing3 in
-                        
-                   }.foregroundColor(isEditing3 ? .red : .blue)
-                
-                
-                
+                   }.foregroundColor(isEditing3 ? .red : .blue).keyboardType(.decimalPad)
+                Text(" days for this goal")
+
             }
             Spacer()
             
@@ -87,7 +89,41 @@ struct GoalsView: View {
          
             }
                    
-            Text("Add Goal").foregroundColor(.red)
+            Button("Add Goal"){
+                let goal = GoalModel(context: moc)
+                goal.id = UUID()
+                goal.name = title
+                //goal.status =
+                goal.trigger = trigger
+                goal.why = why
+
+                let cal = Calendar.current
+                // DateComponents as a date specifier
+                var startdate = cal.date(from: DateComponents(calendar: cal,
+                                                              year: 2022,
+                                                              month: 1,
+                                                              day: 1))!
+
+               
+                startdate = cal.date(byAdding: .day, value: -3, to: Calendar.current.startOfDay(for: Date()))!
+                
+                let stopDate = cal.date(byAdding: .day, value: Int(days) ?? 30, to: startdate)!
+
+                while startdate <= stopDate {
+                    //mydates.append(from: startdate)
+                    let day=DaysModel(context: moc)
+                    day.goal = goal
+                    day.dt = startdate
+                    day.status = false// Bool.random() //false
+                    startdate = Calendar.current.date(byAdding: .day, value: 1, to: startdate)!
+                }
+
+                
+                try? moc.save()
+                dismiss()
+                
+                
+            }
             
         
         }
@@ -100,6 +136,7 @@ struct GoalsView: View {
     
 
 
+@available(iOS 15.0, *)
 struct GoalsView_Previews: PreviewProvider {
     static var previews: some View {
         GoalsView()
