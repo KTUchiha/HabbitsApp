@@ -8,57 +8,6 @@
 import SwiftUI
 
 
-
-struct CheckboxStyle: ToggleStyle { // this struct defines how the toggle should look like
-   // @State private var changeView = false
-    func makeBody(configuration: Self.Configuration) -> some View { //making your own checkbox
-        
-            
-        return HStack {
-            configuration.label //
-            //    Spacer()
-            Image(systemName: configuration.$isOn.wrappedValue ? "checkmark.circle.fill" : "circle")
-                .resizable()
-                .frame(width: 24, height: 24)
-                .foregroundColor(configuration.isOn ? .green : .red)
-                .font(.system(size: 20, weight: .bold, design: .default))
-                .onTapGesture {
-                    configuration.$isOn.wrappedValue.toggle()
-                    debugPrint("Tapped")
-                    
-                    
-                   // self.changeView = true
-            }
-        }
-        
-    }
-}
-
-struct CheckView: View  {
-    
-    @State  var isChecked:Bool = false
-    var title:String
-    //   @State var isGray:Bool = true
-    
-    // func toggle(){isChecked = !isChecked}
-    var body: some View {
-        //        Button(action: toggle){
-        //            HStack{
-        //                Image(systemName: isChecked ? "checkmark.circle": "circle").saturation(isGray ? 0.0 : 1.0)
-        //                Text(title)
-        //            }
-        //
-        //        }
-        
-        Toggle(isOn: $isChecked, label: {
-            // Image(systemName: "heart")
-            Text(title)
-        }).toggleStyle(CheckboxStyle())
-        
-    }
-    
-}
-
 @available(iOS 15.0, *)
 struct ContentView: View {
     @Environment(\.managedObjectContext) var moc
@@ -88,16 +37,7 @@ struct ContentView: View {
         
         // let streak: Array<Int>
     }
-    /*
-     private var goals = [
-     Goal(name: "Excercise Daily", why:"Get fit"),
-     Goal(name: "Drink Water 4 times",why:"Stop Headaches"),
-     Goal(name: "Sleep by 9:30PM",why:"Prevent fatigue the next day"),
-     Goal(name: "Wake up at 5:00AM",why:"concentrate"),
-     Goal(name: "Practice Piano", why:"get better at piano")
-     
-     ] */
-    
+   
     func getDate()->String{
         let date = Date()
         //  You can print the current date using a DateFormatter
@@ -124,17 +64,7 @@ struct ContentView: View {
             
             HStack{
                 Text("Goals for Today").font(.system(size: 30, weight: .heavy, design: .default))
-                /*
-                Button("Save"){
-                    if moc.hasChanges {
-                        do {
-                          try moc.save()
-                        } catch {
-                            fatalError("Could not save context.")
-                        }
-                      }
-                    
-                } */
+      
             }
             
             //.padding()
@@ -172,24 +102,7 @@ struct ContentView: View {
                                 (calendar.dateComponents([.day], from: mday.dt! , to: Date()).day! >= 0))
                             {
                             
-                               // CheckView(isChecked: mday.status ,title: "" )
-                                /*
-                                Button(action: {
-                                  mday.status.toggle()
-                                    self.refresh=mday.status
-                                    try?moc.save()
-                                    
-                                  }
-                                ) {
-                                  Image(systemName: mday.status ?  "checkmark.circle.fill" : "circle")
-                                        .resizable()
-                                        .frame(width: 24, height: 24)
-                                        .foregroundColor(mday.status ? .green : .red)
-                                        .font(.system(size: 20, weight: .bold, design: .default))
-                                }
-                                .buttonStyle(PlainButtonStyle())
-                               */
-                               
+                             
                                 if mday.dt! <= Date(){
                                     
                                     
@@ -204,14 +117,7 @@ struct ContentView: View {
                                 )){
                                     Text(formatDate(dte:mday.dt ?? Date() ))
                                 } } //.frame(width: 42, height: 18)
-                                 //.foregroundColor(mday.status ? .green : .red)
-                                // toggleStyle(.automatic)
-                                //.toggleStyle(CheckboxStyle())
-                                 
-                           
-                                   // {
-                                   // Text("")
-                                   // }
+                                   
                             }
                             
                            
@@ -220,26 +126,7 @@ struct ContentView: View {
                       //  Text("Today" + goal.totalnow )
                     }
                     
-                    /*
-                     if (goal.trackeddays?.count ?? 0 > 10)
-                     {
-                     
-                     HStack{
-                     //  CheckView(isChecked: true,title: "")
-                     
-                     CheckView(isChecked: true  ,title: "")
-                     CheckView(isChecked: true,title: "")
-                     CheckView(isChecked: true,title: "")
-                     CheckView(isChecked: true,title: "")
-                     CheckView(isChecked: true, title: "Today")
-                     
-                     
-                     }
-                     
-                     
-                     }  */
-                    
-                    //    }
+     
                 }
                 
             }
