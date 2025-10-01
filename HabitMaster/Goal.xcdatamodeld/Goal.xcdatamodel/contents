@@ -11,7 +11,7 @@
         <attribute name="status" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="trigger" optional="YES" attributeType="String"/>
         <attribute name="why" optional="YES" attributeType="String"/>
-        <relationship name="trackeddays" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="DaysModel" inverseName="goal" inverseEntity="DaysModel"/>
+        <relationship name="trackeddays" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="DaysModel" inverseName="goal" inverseEntity="DaysModel"/>
     </entity>
     <elements>
         <element name="DaysModel" positionX="-18" positionY="36" width="128" height="88"/>
