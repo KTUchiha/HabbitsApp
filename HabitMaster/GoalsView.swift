@@ -120,28 +120,24 @@ struct GoalsView: View {
                         goal.why = why
 
                         let cal = Calendar.current
-                        // Start from 3 days ago (not 2022!)
-                        guard let startdate = cal.date(byAdding: .day, value: -3, to: cal.startOfDay(for: Date())),
-                              let stopDate = cal.date(byAdding: .day, value: daysCount + 2, to: startdate) else {
-                            DispatchQueue.main.async {
-                                errorMessage = "Error calculating dates"
-                                showingError = true
-                                isSaving = false
-                            }
-                            return
-                        }
+                        let today = cal.startOfDay(for: Date())
 
-                        var currentDate = startdate
-                        while currentDate <= stopDate {
+                        // Create exactly daysCount days starting from today
+                        // BUT only initialize status=false for days up to today
+                        // Future days will have nil status (not yet reached)
+                        for dayOffset in 0..<daysCount {
+                            guard let dayDate = cal.date(byAdding: .day, value: dayOffset, to: today) else {
+                                continue
+                            }
+
                             let day = DaysModel(context: context)
                             day.goal = goal
-                            day.dt = currentDate
-                            day.status = false
+                            day.dt = dayDate
 
-                            guard let nextDate = cal.date(byAdding: .day, value: 1, to: currentDate) else {
-                                break
+                            // Only set false for today, future days stay nil
+                            if dayDate <= today {
+                                day.status = false
                             }
-                            currentDate = nextDate
                         }
 
                         do {

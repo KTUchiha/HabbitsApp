@@ -12,6 +12,7 @@ import SwiftUI
 struct ContentView: View {
     @Environment(\.managedObjectContext) var moc
     @Environment(\.dismiss) var dismiss
+    @Environment(\.scenePhase) var scenePhase
     @EnvironmentObject var dataController: DataController
     @FetchRequest(sortDescriptors: [
         SortDescriptor(\.name)
@@ -21,10 +22,32 @@ struct ContentView: View {
     @State private var goalToDelete: GoalModel?
     @State private var showingSaveError = false
     @State private var saveErrorMessage = ""
-    
+    @State private var currentDate = Date()
+    @State private var midnightTimer: Timer?
+    @State private var showingInfoPopup = false
+    @State private var selectedGoal: GoalModel?
+    @State private var showConfetti = false
+    @State private var isRefreshing = false
+
+    func refreshData() {
+        isRefreshing = true
+
+        // Force Core Data to refresh all objects from persistent store
+        moc.reset()
+        moc.refreshAllObjects()
+
+        // Update current date in case day boundary was crossed
+        currentDate = Date()
+
+        // Small delay to show refresh indicator
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            isRefreshing = false
+        }
+    }
+
     func formatDate(dte: Date) -> String {
         let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
+        let today = calendar.startOfDay(for: currentDate)
         let dateToCheck = calendar.startOfDay(for: dte)
 
         if dateToCheck == today {
@@ -41,6 +64,66 @@ struct ContentView: View {
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "MM/dd EEEE"
             return dateFormatter.string(from: dte)
+        }
+    }
+
+    func startMidnightTimer() {
+        // Cancel existing timer
+        midnightTimer?.invalidate()
+
+        let calendar = Calendar.current
+        let now = Date()
+
+        // Calculate next midnight
+        guard let tomorrow = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: now)) else {
+            return
+        }
+
+        let timeUntilMidnight = tomorrow.timeIntervalSince(now)
+
+        // Set timer to fire at midnight
+        midnightTimer = Timer.scheduledTimer(withTimeInterval: timeUntilMidnight, repeats: false) { _ in
+            // Update current date
+            currentDate = Date()
+            // Restart timer for next midnight
+            startMidnightTimer()
+        }
+    }
+
+
+    @ViewBuilder
+    func streakCalendarView(for goal: GoalModel) -> some View {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: currentDate)
+
+        // Get last 30 days worth of data
+        let calendarDays: [(date: Date, dayModel: DaysModel?)] = {
+            var days: [(date: Date, dayModel: DaysModel?)] = []
+            for i in (0..<30).reversed() {
+                if let date = calendar.date(byAdding: .day, value: -i, to: today) {
+                    let dayModel = goal.dayArray.first { day in
+                        guard let dayDate = day.dt else { return false }
+                        return calendar.isDate(dayDate, inSameDayAs: date)
+                    }
+                    // Only include if day exists in goal data
+                    if dayModel != nil {
+                        days.append((date: date, dayModel: dayModel))
+                    }
+                }
+            }
+            return days
+        }()
+
+        // Don't show calendar if less than 3 days of data
+        if calendarDays.count >= 3 {
+            HStack(spacing: 4) {
+                ForEach(calendarDays, id: \.date) { item in
+                    Circle()
+                        .fill((item.dayModel?.status ?? false) ? Color.green : Color.gray.opacity(0.25))
+                        .frame(width: 8, height: 8)
+                }
+            }
+            .padding(.top, 8)
         }
     }
     
@@ -100,37 +183,89 @@ struct ContentView: View {
                         ForEach(goals, id: \.self) { goal in
                             VStack(alignment: .leading, spacing: 8) {
                                 // Header with goal name and delete button
+                                let endDate = goal.dayArray.last?.dt ?? Date()
+                                let formatter = DateFormatter()
+                                let _ = { formatter.dateFormat = "MMM d, yyyy" }()
+                                let totalDays = goal.dayArray.count
+                                // Count days elapsed (days that have passed, including today)
+                                let elapsedDays = goal.dayArray.filter { ($0.dt ?? Date()) <= calendar.startOfDay(for: currentDate) }.count
+                                let progress = totalDays > 0 ? Double(elapsedDays) / Double(totalDays) : 0
+
                                 HStack(alignment: .top) {
+                                    Button(action: {
+                                        selectedGoal = goal
+                                        showingInfoPopup = true
+                                    }) {
+                                        Image(systemName: "info.circle")
+                                            .font(.system(size: 16))
+                                            .foregroundColor(.blue)
+                                    }
+                                    .buttonStyle(.plain)
+                                    .padding(.top, 2)
+
                                     VStack(alignment: .leading, spacing: 4) {
                                         Text(goal.name ?? "My Goal")
                                             .font(.system(size: 20, weight: .heavy, design: .default))
 
-                                        // Streak info
-                                        HStack(spacing: 12) {
-                                            if goal.currentStreak > 0 {
-                                                HStack(spacing: 4) {
-                                                    Image(systemName: "flame.fill")
-                                                        .foregroundColor(.orange)
-                                                    Text("\(goal.currentStreak) day streak")
-                                                        .font(.system(size: 14, weight: .medium))
-                                                        .foregroundColor(.orange)
-                                                }
+                                        // End date and longest streak
+                                        HStack(spacing: 8) {
+                                            HStack(spacing: 4) {
+                                                Image(systemName: "flame.fill")
+                                                    .font(.system(size: 12))
+                                                    .foregroundColor(.orange)
+                                                Text("Longest: \(goal.longestStreak)")
+                                                    .font(.system(size: 14, weight: .medium))
+                                                    .foregroundColor(.secondary)
                                             }
 
-                                            if goal.longestStreak > 0 {
-                                                HStack(spacing: 4) {
-                                                    Image(systemName: "trophy.fill")
-                                                        .foregroundColor(.yellow)
-                                                    Text("Best: \(goal.longestStreak)")
-                                                        .font(.system(size: 14, weight: .medium))
-                                                        .foregroundColor(.secondary)
-                                                }
-                                            }
+                                            Text("•")
+                                                .foregroundColor(.secondary)
+
+                                            Text("Ends \(formatter.string(from: endDate))")
+                                                .font(.system(size: 14, weight: .medium))
+                                                .foregroundColor(.secondary)
                                         }
 
-                                        Text(goal.totalnow)
-                                            .font(.system(size: 12, weight: .light, design: .default))
-                                            .foregroundColor(.secondary)
+                                        // Progress bar with style
+                                        HStack(spacing: 8) {
+                                            GeometryReader { geometry in
+                                                ZStack(alignment: .leading) {
+                                                    // Background with subtle inner shadow effect
+                                                    RoundedRectangle(cornerRadius: 10)
+                                                        .fill(Color.gray.opacity(0.12))
+                                                        .overlay(
+                                                            RoundedRectangle(cornerRadius: 10)
+                                                                .stroke(Color.gray.opacity(0.1), lineWidth: 1)
+                                                        )
+                                                        .frame(height: 12)
+
+                                                    // Animated gradient progress
+                                                    RoundedRectangle(cornerRadius: 10)
+                                                        .fill(
+                                                            LinearGradient(
+                                                                gradient: Gradient(colors: [
+                                                                    Color(red: 0.0, green: 0.75, blue: 1.0),
+                                                                    Color(red: 0.5, green: 0.3, blue: 1.0),
+                                                                    Color(red: 0.8, green: 0.2, blue: 0.9)
+                                                                ]),
+                                                                startPoint: .leading,
+                                                                endPoint: .trailing
+                                                            )
+                                                        )
+                                                        .shadow(color: Color.blue.opacity(0.3), radius: 4, x: 0, y: 2)
+                                                        .frame(width: max(12, geometry.size.width * progress), height: 12)
+                                                }
+                                            }
+                                            .frame(height: 12)
+
+                                            Text("\(elapsedDays)/\(totalDays)")
+                                                .font(.system(size: 13, weight: .bold, design: .rounded))
+                                                .foregroundColor(.primary)
+                                                .fixedSize()
+                                        }
+
+                                        // Visual streak calendar (right-aligned with progress bar)
+                                        streakCalendarView(for: goal)
                                     }
 
                                     Spacer()
@@ -142,80 +277,68 @@ struct ContentView: View {
                                         Image(systemName: "trash")
                                             .foregroundColor(.red)
                                     }
+                                    .buttonStyle(.plain)
                                 }
 
-                                // Days toggles
-                                ForEach(Array(goal.dayArray ), id: \.self) { mday in
-                                    if let dayDate = mday.dt,
-                                       let daysFromNow = calendar.dateComponents([.day], from: dayDate, to: Date()).day,
-                                       daysFromNow < 3,
-                                       daysFromNow >= 0,
-                                       dayDate <= Date() {
+                                // Toggles with minimal labels
+                                HStack(spacing: 24) {
+                                    ForEach(Array(goal.dayArray), id: \.self) { mday in
+                                        if let dayDate = mday.dt,
+                                           let daysFromNow = calendar.dateComponents([.day], from: dayDate, to: currentDate).day,
+                                           daysFromNow < 2,
+                                           daysFromNow >= 0,
+                                           dayDate <= currentDate {
 
-                                        let isToday = calendar.isDateInToday(dayDate)
+                                            let isToday = calendar.isDate(dayDate, inSameDayAs: currentDate)
 
-                                        HStack {
-                                            VStack(alignment: .leading, spacing: 4) {
-                                                Text(formatDate(dte: dayDate))
-                                                    .font(isToday ? .headline : .body)
-                                                    .fontWeight(isToday ? .bold : .regular)
-                                                    .foregroundColor(isToday ? .blue : .primary)
+                                            HStack(spacing: 6) {
+                                                Toggle("", isOn: Binding<Bool>(
+                                                    get: {
+                                                        mday.status ?? false
+                                                    },
+                                                    set: { newValue in
+                                                        // Update in-memory value immediately (no redraw)
+                                                        mday.status = newValue
 
-                                                if isToday {
-                                                    Text("Make it count!")
-                                                        .font(.caption)
-                                                        .foregroundColor(.blue.opacity(0.7))
-                                                }
-                                            }
+                                                        // Show confetti first (before save)
+                                                        if newValue && isToday {
+                                                            showConfetti = true
+                                                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                                                showConfetti = false
+                                                            }
+                                                        }
 
-                                            Spacer()
-
-                                            Toggle("", isOn: Binding<Bool>(
-                                                get: {
-                                                    mday.status ?? false
-                                                },
-                                                set: { newValue in
-                                                    // Update value immediately for UI responsiveness
-                                                    mday.status = newValue
-
-                                                    // Capture context reference before async
-                                                    let context = moc
-
-                                                    // Save on background with debounce
-                                                    Task {
-                                                        // Small delay to batch rapid toggles
-                                                        try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 second
-
-                                                        await context.perform {
+                                                        // Save asynchronously to avoid blocking UI
+                                                        DispatchQueue.main.async {
                                                             do {
-                                                                if context.hasChanges {
-                                                                    try context.save()
-                                                                }
+                                                                try moc.save()
+                                                                print("✅ Saved toggle: \(newValue)")
                                                             } catch {
-                                                                Task { @MainActor in
-                                                                    saveErrorMessage = "Failed to save: \(error.localizedDescription)"
-                                                                    showingSaveError = true
-                                                                    // Revert on failure
-                                                                    mday.status = !newValue
-                                                                }
+                                                                print("❌ Save failed: \(error)")
+                                                                // Revert on error
+                                                                mday.status = !newValue
+                                                                saveErrorMessage = "Failed to save: \(error.localizedDescription)"
+                                                                showingSaveError = true
                                                             }
                                                         }
                                                     }
-                                                }
-                                            ))
-                                            .toggleStyle(SwitchToggleStyle(tint: .green))
+                                                ))
+                                                .toggleStyle(SwitchToggleStyle(tint: .green))
+
+                                                Text(isToday ? "Today" : "Yest")
+                                                    .font(.system(size: 13, weight: .medium))
+                                                    .foregroundColor(.secondary)
+                                            }
                                         }
-                                        .padding(.vertical, isToday ? 8 : 4)
-                                        .padding(.horizontal, 8)
-                                        .background(
-                                            isToday ? Color.blue.opacity(0.1) : Color.clear
-                                        )
-                                        .cornerRadius(8)
                                     }
                                 }
+                                .padding(.vertical, 8)
                             }
                             .padding(.vertical, 4)
                         }
+                    }
+                    .refreshable {
+                        refreshData()
                     }
 
                     if !goals.isEmpty {
@@ -258,14 +381,97 @@ struct ContentView: View {
         } message: {
             Text(saveErrorMessage)
         }
+        .alert(selectedGoal?.name ?? "Goal Info", isPresented: $showingInfoPopup) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            if let goal = selectedGoal {
+                VStack(alignment: .leading, spacing: 8) {
+                    if let why = goal.why, !why.isEmpty {
+                        Text("Why: \(why)")
+                    }
+                    if let trigger = goal.trigger, !trigger.isEmpty {
+                        Text("\nWhen: \(trigger)")
+                    }
+                }
+            }
+        }
+        .onAppear {
+            // Start midnight timer when view appears
+            startMidnightTimer()
+            // Refresh context from store to get latest data
+            moc.refreshAllObjects()
+        }
+        .onDisappear {
+            // Clean up timer when view disappears
+            midnightTimer?.invalidate()
+            // Force save any pending changes
+            if moc.hasChanges {
+                try? moc.save()
+            }
+        }
+        .onChange(of: scenePhase) { newPhase in
+            if newPhase == .active {
+                // Update date when app becomes active (from background)
+                currentDate = Date()
+                // Restart timer
+                startMidnightTimer()
+            } else if newPhase == .background {
+                // Invalidate timer when going to background
+                midnightTimer?.invalidate()
+            }
+        }
+        .overlay(
+            ConfettiView(isActive: $showConfetti)
+                .allowsHitTesting(false)
+        )
     }
-    
-    
-    
-    
-    
-    
-    
+}
+
+struct ConfettiView: View {
+    @Binding var isActive: Bool
+    @State private var particles: [ConfettiParticle] = []
+
+    var body: some View {
+        ZStack {
+            ForEach(particles) { particle in
+                Circle()
+                    .fill(particle.color)
+                    .frame(width: particle.size, height: particle.size)
+                    .position(particle.position)
+                    .opacity(particle.opacity)
+            }
+        }
+        .onChange(of: isActive) { active in
+            if active {
+                particles = (0..<50).map { _ in ConfettiParticle() }
+                withAnimation(.linear(duration: 2.0)) {
+                    particles = particles.map { particle in
+                        var p = particle
+                        p.position.y += 800
+                        p.opacity = 0
+                        return p
+                    }
+                }
+            } else {
+                particles = []
+            }
+        }
+    }
+}
+
+struct ConfettiParticle: Identifiable {
+    let id = UUID()
+    var position: CGPoint = CGPoint(
+        x: CGFloat.random(in: 0...400),
+        y: CGFloat.random(in: -100...100)
+    )
+    let color: Color = [.red, .blue, .green, .yellow, .orange, .pink, .purple].randomElement()!
+    let size: CGFloat = CGFloat.random(in: 8...16)
+    var opacity: Double = 1.0
+}
+
+@available(iOS 17.0, *)
+extension ContentView {
     struct ContentView_Previews: PreviewProvider {
         static var previews: some View {
             Group {
